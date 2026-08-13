@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FreeSMS — Free SMS with a Temporary Phone Number</title>
+<style>
+  :root{
+    --blue:#4553D9;
+    --blue-dark:#3A46C0;
+    --blue-deep:#2E3899;
+    --ink:#171F2E;
+    --ink-soft:#4B5468;
+    --bg:#FFFFFF;
+    --bg-soft:#F6F7FC;
+    --line:#E7E9F3;
+    --green:#1DB954;
+    --star:#00B67A;
+    --radius:14px;
+    --radius-lg:20px;
+    --shadow-sm:0 1px 2px rgba(23,31,46,0.06);
+    --shadow-md:0 8px 24px rgba(45,55,140,0.10);
+    --shadow-lg:0 20px 60px rgba(45,55,140,0.18);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;}
+  }
+
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+
+  /* ---------- HEADER ---------- */
+  header{
+    position:sticky;top:0;z-index:40;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .header-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    height:68px;
+  }
+  .logo{
+    display:flex;align-items:center;gap:10px;
+    font-weight:800;font-size:20px;letter-spacing:-0.02em;color:var(--ink);
+  }
+  .logo-mark{
+    width:34px;height:34px;border-radius:9px;
+    background:linear-gradient(145deg,var(--blue),var(--blue-deep));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:var(--shadow-sm);
+    flex-shrink:0;
+  }
+  .header-right{display:flex;align-items:center;gap:18px;}
+  .lang-pill{
+    display:flex;align-items:center;gap:6px;
+    font-size:14px;font-weight:600;color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .flag{width:20px;height:14px;border-radius:2px;overflow:hidden;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,0.06);}
+  .burger{
+    display:flex;flex-direction:column;gap:4px;cursor:pointer;padding:6px;
+  }
+  .burger span{width:20px;height:2px;background:var(--ink);border-radius:2px;}
+
+  /* ---------- TRUST BADGE ---------- */
+  .trust{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    padding:28px 24px 8px;
+    flex-wrap:wrap;
+  }
+  .trust-label{font-weight:800;font-size:15px;color:var(--ink);}
+  .stars{display:flex;gap:3px;}
+  .star-box{
+    width:22px;height:22px;background:var(--star);
+    display:flex;align-items:center;justify-content:center;
+    border-radius:3px;
+  }
+  .star-box svg{width:13px;height:13px;fill:#fff;}
+  .star-box.half{background:linear-gradient(90deg,var(--star) 50%, #E4E6F1 50%);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:36px 24px 8px;
+    text-align:center;
+  }
+  .hero h1{
+    font-size:clamp(34px,6vw,58px);
+    font-weight:800;
+    letter-spacing:-0.03em;
+    line-height:1.05;
+    margin:0 auto 22px;
+    max-width:780px;
+    color:var(--ink);
+  }
+  .hero-points{
+    list-style:none;padding:0;margin:0 auto 28px;
+    max-width:520px;
+    text-align:left;
+    display:inline-block;
+  }
+  .hero-points li{
+    position:relative;
+    padding-left:24px;
+    margin-bottom:10px;
+    font-size:18px;
+    color:var(--ink-soft);
+  }
+  .hero-points li::before{
+    content:"";
+    position:absolute;left:4px;top:11px;
+    width:6px;height:6px;border-radius:50%;
+    background:var(--ink-soft);
+  }
+
+  .cta-stack{
+    max-width:420px;margin:0 auto;
+    display:flex;flex-direction:column;gap:14px;
+  }
+
+  .btn-primary{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--blue);
+    color:#fff;
+    font-weight:700;font-size:17px;
+    padding:18px 28px;
+    border-radius:14px;
+    border:none;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(69,83,217,0.28);
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+    width:100%;
+  }
+  .btn-primary:hover{
+    background:var(--blue-dark);
+    transform:translateY(-1px);
+    box-shadow:0 8px 22px rgba(69,83,217,0.36);
+  }
+  .btn-primary:active{transform:translateY(0px) scale(0.99);}
+  .btn-primary:focus-visible{outline:3px solid #B9C0FF;outline-offset:2px;}
+
+  .btn-ghost-static{
+    display:flex;align-items:center;justify-content:center;
+    background:transparent;
+    color:var(--blue);
+    font-weight:700;font-size:17px;
+    padding:17px 28px;
+    border-radius:14px;
+    border:1.5px solid var(--blue);
+    width:100%;
+    cursor:default;
+    user-select:none;
+    opacity:0.85;
+  }
+
+  .below-cta-copy{
+    max-width:560px;margin:34px auto 0;
+    font-size:16px;line-height:1.65;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+  .below-cta-copy strong{color:var(--ink);}
+
+  /* ---------- CHECKLIST ---------- */
+  .checklist{
+    max-width:520px;margin:44px auto 0;
+    padding:0 24px;
+    display:flex;flex-direction:column;gap:22px;
+  }
+  .check-item{
+    display:flex;align-items:flex-start;gap:12px;
+    font-size:18px;color:var(--ink);
+    font-weight:500;
+  }
+  .check-icon{
+    flex-shrink:0;width:20px;height:20px;margin-top:2px;
+    color:var(--blue);
+  }
+
+  /* ---------- ILLUSTRATION / STAT SECTION ---------- */
+  .stat-section{
+    padding:64px 24px 20px;
+    display:flex;justify-content:center;
+  }
+  .stat-visual{
+    position:relative;
+    width:100%;max-width:360px;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .stat-bubble{
+    position:relative;
+    background:var(--bg-soft);
+    border-radius:28px 28px 28px 4px;
+    padding:26px 30px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .stat-badge{
+    position:absolute;top:-14px;right:-10px;
+    background:var(--ink);
+    color:#fff;
+    font-weight:800;font-size:15px;
+    padding:8px 14px;
+    border-radius:20px;
+  }
+  .envelope-main{width:110px;height:78px;flex-shrink:0;}
+  .floating-envelopes{
+    position:relative;width:100%;height:210px;margin-top:-20px;
+  }
+  .floating-envelopes svg{position:absolute;opacity:0.55;}
+  .person-illustration{width:220px;height:auto;margin-top:-10px;position:relative;z-index:2;}
+
+  /* ---------- WHY SECTION ---------- */
+  .why-section{
+    padding:70px 24px 20px;
+    max-width:720px;margin:0 auto;
+  }
+  .why-section h2{
+    font-size:clamp(30px,5vw,42px);
+    font-weight:800;letter-spacing:-0.02em;
+    text-align:center;
+    margin:0 0 26px;
+    line-height:1.1;
+  }
+  .why-intro{
+    font-size:18px;color:var(--ink-soft);
+    text-align:center;
+    max-width:520px;margin:0 auto 36px;
+  }
+  .why-list{
+    list-style:none;padding:0;margin:0;
+    display:flex;flex-direction:column;gap:26px;
+  }
+  .why-list li{
+    display:flex;align-items:flex-start;gap:14px;
+    font-size:18px;color:var(--ink);
+    line-height:1.5;
+  }
+  .why-list .check-icon{margin-top:3px;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    margin-top:80px;
+    border-top:1px solid var(--line);
+    padding:36px 24px 44px;
+    text-align:center;
+    background:var(--bg-soft);
+  }
+  .footer-logo{
+    display:inline-flex;align-items:center;gap:8px;
+    font-weight:800;font-size:18px;color:var(--ink);
+    margin-bottom:10px;
+  }
+  .footer-copy{
+    font-size:14px;color:var(--ink-soft);
+  }
+
+  /* ---------- CHAT BUBBLE (decorative, from screenshots) ---------- */
+  .chat-fab{
+    position:fixed;bottom:22px;right:22px;
+    width:56px;height:56px;border-radius:16px;
+    background:var(--blue);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 20px rgba(69,83,217,0.35);
+    cursor:pointer;
+    z-index:30;
+  }
+  .chat-fab svg{width:24px;height:24px;}
+
+  /* ================================================================
+     MODAL SYSTEM (access gate)
+     ================================================================ */
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(23,31,46,0.55);
+    backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+    z-index:100;
+    opacity:0;pointer-events:none;
+    transition:opacity .22s ease;
+  }
+  .modal-overlay.active{opacity:1;pointer-events:auto;}
+
+  .modal-card{
+    background:#fff;
+    border-radius:var(--radius-lg);
+    width:100%;max-width:420px;
+    padding:36px 32px 32px;
+    box-shadow:var(--shadow-lg);
+    position:relative;
+    transform:translateY(18px) scale(0.97);
+    transition:transform .28s cubic-bezier(.2,.9,.3,1.15);
+    max-height:88vh;
+    overflow-y:auto;
+  }
+  .modal-overlay.active .modal-card{transform:translateY(0) scale(1);}
+
+  .modal-close{
+    position:absolute;top:18px;right:18px;
+    width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--bg-soft);
+    border:none;cursor:pointer;color:var(--ink-soft);
+    transition:background .15s ease;
+  }
+  .modal-close:hover{background:var(--line);}
+  .modal-close:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+
+  .modal-icon{
+    width:52px;height:52px;border-radius:14px;
+    background:linear-gradient(145deg,var(--blue),var(--blue-deep));
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:18px;
+  }
+  .modal-icon svg{width:26px;height:26px;color:#fff;}
+
+  .modal-card h3{
+    font-size:23px;font-weight:800;letter-spacing:-0.02em;
+    margin:0 0 10px;line-height:1.25;
+  }
+  .modal-card p{
+    font-size:15.5px;color:var(--ink-soft);
+    line-height:1.6;margin:0 0 24px;
+  }
+  .modal-card p.tight{margin-bottom:18px;}
+
+  .modal-primary-btn{
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    width:100%;
+    background:var(--blue);
+    color:#fff;font-weight:700;font-size:16px;
+    padding:16px 20px;border-radius:13px;border:none;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(69,83,217,0.28);
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .modal-primary-btn:hover{background:var(--blue-dark);transform:translateY(-1px);}
+  .modal-primary-btn:focus-visible{outline:3px solid #B9C0FF;outline-offset:2px;}
+  .modal-primary-btn svg{width:19px;height:19px;flex-shrink:0;}
+
+  .modal-secondary-link{
+    display:block;text-align:center;
+    margin-top:16px;
+    font-size:14.5px;font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    background:none;border:none;width:100%;padding:6px;
+  }
+  .modal-secondary-link:hover{color:var(--ink);}
+
+  .step-tag{
+    display:inline-flex;align-items:center;
+    font-size:12.5px;font-weight:700;letter-spacing:0.04em;
+    color:var(--blue);
+    background:#EEF0FD;
+    padding:5px 11px;border-radius:20px;
+    margin-bottom:14px;
+    text-transform:uppercase;
+  }
+
+  /* Code input boxes */
+  .code-inputs{
+    display:flex;gap:9px;justify-content:center;
+    margin-bottom:8px;
+  }
+  .code-box{
+    width:46px;height:56px;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    text-align:center;
+    font-size:22px;font-weight:700;
+    color:var(--ink);
+    background:var(--bg-soft);
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .code-box:focus{
+    outline:none;
+    border-color:var(--blue);
+    background:#fff;
+    box-shadow:0 0 0 3px rgba(69,83,217,0.14);
+  }
+
+  .code-error{
+    font-size:14px;color:#D93B3B;
+    text-align:center;
+    margin:12px 0 0;
+    min-height:20px;
+    font-weight:600;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    opacity:0;
+    transition:opacity .15s ease;
+  }
+  .code-error.show{opacity:1;}
+  .code-error svg{width:16px;height:16px;flex-shrink:0;}
+
+  .shake{animation:shakeAnim .38s ease;}
+  @keyframes shakeAnim{
+    10%,90%{transform:translateX(-1px);}
+    20%,80%{transform:translateX(2px);}
+    30%,50%,70%{transform:translateX(-4px);}
+    40%,60%{transform:translateX(4px);}
+  }
+
+  /* success state */
+  .success-check{
+    width:64px;height:64px;border-radius:50%;
+    background:#E7F9EE;
+    display:flex;align-items:center;justify-content:center;
+    margin:4px auto 20px;
+  }
+  .success-check svg{width:30px;height:30px;color:var(--green);}
+
+  .center-text{text-align:center;}
+
+  .modal-hint{
+    background:var(--bg-soft);
+    border-radius:12px;
+    padding:14px 16px;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    display:flex;gap:10px;
+    align-items:flex-start;
+    margin-top:6px;
+  }
+  .modal-hint svg{width:17px;height:17px;flex-shrink:0;margin-top:1px;color:var(--blue);}
+  .modal-hint span strong{color:var(--ink);}
+
+  .spinner{
+    width:18px;height:18px;
+    border:2.5px solid rgba(255,255,255,0.4);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  @media (max-width:480px){
+    .modal-card{padding:30px 22px 26px;}
+    .code-box{width:40px;height:52px;font-size:20px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-bar">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4L20 4L20 14C20 17.3137 17.3137 20 14 20L10 20C6.68629 20 4 17.3137 4 14L4 4Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10L11 12L15 8" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <span>FreeSMS</span>
+    </div>
+    <div class="header-right">
+      <div class="lang-pill">
+        <span class="flag">
+          <svg viewBox="0 0 20 14" width="20" height="14"><rect width="20" height="14" fill="#B22234"/><g fill="#fff"><rect y="1.08" width="20" height="1.08"/><rect y="3.23" width="20" height="1.08"/><rect y="5.38" width="20" height="1.08"/><rect y="7.54" width="20" height="1.08"/><rect y="9.69" width="20" height="1.08"/><rect y="11.85" width="20" height="1.08"/></g><rect width="8" height="7.54" fill="#3C3B6E"/></svg>
+        </span>
+        <span>EN</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="#4B5468" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="burger"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Trust badge -->
+  <div class="trust">
+    <span class="trust-label">Excellent</span>
+    <div class="stars">
+      <span class="star-box"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7L2 9.2l7.1-.6z"/></svg></span>
+      <span class="star-box"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7L2 9.2l7.1-.6z"/></svg></span>
+      <span class="star-box"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7L2 9.2l7.1-.6z"/></svg></span>
+      <span class="star-box"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7L2 9.2l7.1-.6z"/></svg></span>
+      <span class="star-box half"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7L2 9.2l7.1-.6z"/></svg></span>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero wrap">
+    <h1>Free SMS with a Temporary Phone Number</h1>
+    <ul class="hero-points">
+      <li>90 countries and more than 1 million numbers</li>
+      <li>Adding phone numbers daily</li>
+    </ul>
+
+    <div class="cta-stack">
+      <button class="btn-primary" id="openAccessModal">Get temporary number</button>
+      <div class="btn-ghost-static" aria-disabled="true">Learn more about FreeSMS</div>
+    </div>
+
+    <p class="below-cta-copy">
+      New here? Access to FreeSMS is currently invite-based to keep numbers available and abuse-free for everyone. <strong>Tap "Get temporary number"</strong> to request access — it only takes a minute.
+    </p>
+  </section>
+
+  <!-- Checklist -->
+  <div class="checklist">
+    <div class="check-item">
+      <svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Ultra-fast speeds</span>
+    </div>
+    <div class="check-item">
+      <svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Unlimited traffic and bandwidth</span>
+    </div>
+    <div class="check-item">
+      <svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Full security and anonymity</span>
+    </div>
+    <div class="check-item">
+      <svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>30-day money-back guarantee</span>
+    </div>
+  </div>
+
+  <!-- Illustration -->
+  <section class="stat-section">
+    <div class="stat-visual">
+      <div class="stat-bubble">
+        <div class="stat-badge">1,866</div>
+        <svg class="envelope-main" viewBox="0 0 110 78" fill="none">
+          <rect x="2" y="2" width="106" height="74" rx="4" stroke="#171F2E" stroke-width="2.5"/>
+          <path d="M4 4L55 46L106 4" stroke="#171F2E" stroke-width="2.5"/>
+        </svg>
+      </div>
+
+      <svg class="person-illustration" viewBox="0 0 220 240" fill="none">
+        <!-- floating envelopes -->
+        <g opacity="0.85">
+          <rect x="4" y="24" width="34" height="24" rx="2" stroke="#B9C0EE" stroke-width="2" fill="#fff"/>
+          <path d="M4 24L21 38L38 24" stroke="#B9C0EE" stroke-width="2"/>
+          <rect x="178" y="10" width="34" height="24" rx="2" stroke="#B9C0EE" stroke-width="2" fill="#fff"/>
+          <path d="M178 10L195 24L212 10" stroke="#B9C0EE" stroke-width="2"/>
+          <rect x="182" y="150" width="30" height="21" rx="2" stroke="#B9C0EE" stroke-width="2" fill="#fff"/>
+          <path d="M182 150L197 162L212 150" stroke="#B9C0EE" stroke-width="2"/>
+          <rect x="0" y="130" width="30" height="21" rx="2" stroke="#B9C0EE" stroke-width="2" fill="#fff"/>
+          <path d="M0 130L15 142L30 130" stroke="#B9C0EE" stroke-width="2"/>
+          <rect x="30" y="190" width="30" height="21" rx="2" stroke="#B9C0EE" stroke-width="2" fill="#fff"/>
+          <path d="M30 190L45 202L60 190" stroke="#B9C0EE" stroke-width="2"/>
+          <rect x="150" y="200" width="30" height="21" rx="2" stroke="#B9C0EE" stroke-width="2" fill="#fff"/>
+          <path d="M150 200L165 212L180 200" stroke="#B9C0EE" stroke-width="2"/>
+        </g>
+        <!-- person -->
+        <ellipse cx="110" cy="210" rx="46" ry="14" fill="#F0F1FA"/>
+        <path d="M70 210C70 170 85 140 110 140C135 140 150 170 150 210" fill="#A9B2EF"/>
+        <circle cx="110" cy="100" r="34" fill="#F6D9C4"/>
+        <path d="M78 92C78 65 95 50 110 50C128 50 142 68 142 92C142 78 132 66 110 66C92 66 78 78 78 92Z" fill="#2A2438"/>
+        <circle cx="98" cy="102" r="2.4" fill="#2A2438"/>
+        <circle cx="122" cy="102" r="2.4" fill="#2A2438"/>
+        <path d="M104 114C107 117 113 117 116 114" stroke="#2A2438" stroke-width="2" stroke-linecap="round"/>
+        <rect x="96" y="168" width="28" height="42" rx="5" fill="#3A3550"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Why section -->
+  <section class="why-section">
+    <h2>Why use free SMS services?</h2>
+    <p class="why-intro">Why might you need to get a temporary number? Here are some examples from our clients:</p>
+    <ul class="why-list">
+      <li>
+        <svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Register new accounts without using an additional SIM card</span>
+      </li>
+      <li>
+        <svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Create accounts in bulk for sale or personal use</span>
+      </li>
+      <li>
+        <svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Separate your personal number from your business one with a temporary phone number</span>
+      </li>
+      <li>
+        <svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Get bonuses and promo codes for signing up on marketplaces and other platforms</span>
+      </li>
+      <li>
+        <svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Sign up with a phone number from a country where your favorite content is available</span>
+      </li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-logo">
+    <div class="logo-mark" style="width:26px;height:26px;border-radius:7px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 4L20 4L20 14C20 17.3137 17.3137 20 14 20L10 20C6.68629 20 4 17.3137 4 14L4 4Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10L11 12L15 8" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    FreeSMS
+  </div>
+  <p class="footer-copy">© 2026 FreeSMS. All rights reserved.</p>
+</footer>
+
+<div class="chat-fab" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none"><path d="M4 12C4 7.58 8.03 4 13 4C17.97 4 22 7.58 22 12C22 16.42 17.97 20 13 20C11.68 20 10.43 19.72 9.32 19.22L4 20.5L5.4 16.3C4.52 15.05 4 13.58 4 12Z" fill="#fff"/></svg>
+</div>
+
+
+<!-- ============================================================
+     MODAL 1 — Access intro
+     ============================================================ -->
+<div class="modal-overlay" id="modalIntro">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+    <button class="modal-close" id="closeIntro" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6V11C4 16 7.4 20.6 12 22C16.6 20.6 20 16 20 11V6L12 2Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    </div>
+
+    <h3>Before you get your number</h3>
+    <p>To keep numbers available and spam-free for everyone, FreeSMS is currently access-controlled. It only takes a minute to get set up — after that, your number is ready whenever you need it.</p>
+
+    <button class="modal-primary-btn" id="goToStep2">
+      Get access code
+      <svg viewBox="0 0 24 24" fill="none"><path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL 2 — Send to WhatsApp
+     ============================================================ -->
+<div class="modal-overlay" id="modalWhatsapp">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="waTitle">
+    <button class="modal-close" id="closeWhatsapp" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <span class="step-tag">Step 1 of 2</span>
+    <h3 id="waTitle">Request your access code</h3>
+    <p class="tight">Message our team on WhatsApp and you'll get your 6-digit access code right away — it's sent automatically.</p>
+
+    <button class="modal-primary-btn" id="openWhatsapp">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.2-1.4c1.4.8 3.1 1.2 4.8 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z" fill="#fff"/><path d="M8.4 7.5c.2-.4.4-.4.6-.4h.5c.2 0 .4 0 .6.4.2.5.7 1.7.7 1.9.1.1.1.3 0 .4-.1.2-.1.3-.3.4-.1.2-.3.3-.4.5-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.5 1.5.3.1.5.1.6-.1.2-.2.7-.8.9-1 .2-.3.4-.2.6-.1.2.1 1.6.7 1.8.9.2.1.4.2.5.3.1.2.1.9-.2 1.7-.3.8-1.7 1.5-2.3 1.6-.6.1-1.3.1-2.1-.1-.5-.1-1.1-.4-1.9-.7-3.3-1.4-5.5-4.7-5.6-5-.2-.2-1.3-1.8-1.3-3.4 0-1.6.9-2.4 1.2-2.7z" fill="#25D366"/></svg>
+      Message us on WhatsApp
+    </button>
+
+    <div class="modal-hint">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 16v-4M12 8h.01M22 12c0 5.5-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2s10 4.5 10 10z" stroke="currentColor" stroke-width="1.8"/></svg>
+      <span>We reply within a few minutes. <strong>Keep this tab open</strong> — once you have your code, come back here to finish.</span>
+    </div>
+
+    <button class="modal-secondary-link" id="goToStep3">I already have my code →</button>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL 3 — Enter code
+     ============================================================ -->
+<div class="modal-overlay" id="modalCode">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="codeTitle">
+    <button class="modal-close" id="closeCode" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <span class="step-tag">Step 2 of 2</span>
+    <h3 id="codeTitle">Enter your access code</h3>
+    <p class="tight">Type the 6-digit code from WhatsApp to unlock your temporary number.</p>
+
+    <div class="code-inputs" id="codeInputs">
+      <input class="code-box" type="tel" inputmode="numeric" maxlength="1" data-index="0" autocomplete="off" />
+      <input class="code-box" type="tel" inputmode="numeric" maxlength="1" data-index="1" autocomplete="off" />
+      <input class="code-box" type="tel" inputmode="numeric" maxlength="1" data-index="2" autocomplete="off" />
+      <input class="code-box" type="tel" inputmode="numeric" maxlength="1" data-index="3" autocomplete="off" />
+      <input class="code-box" type="tel" inputmode="numeric" maxlength="1" data-index="4" autocomplete="off" />
+      <input class="code-box" type="tel" inputmode="numeric" maxlength="1" data-index="5" autocomplete="off" />
+    </div>
+    <div class="code-error" id="codeError">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4M12 16h.01M10.3 3.9L2.5 17a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" stroke-width="1.8"/></svg>
+      <span>That code didn't match. Check WhatsApp and try again.</span>
+    </div>
+
+    <button class="modal-primary-btn" id="verifyCode" style="margin-top:20px;">
+      <span id="verifyLabel">Verify &amp; continue</span>
+    </button>
+
+    <button class="modal-secondary-link" id="backToWhatsapp">Didn't get a code? Message us again →</button>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL 4 — Success
+     ============================================================ -->
+<div class="modal-overlay" id="modalSuccess">
+  <div class="modal-card center-text" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+    <button class="modal-close" id="closeSuccess" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <div class="success-check">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <h3 id="successTitle">You're in</h3>
+    <p>Your access is verified. Tap below to get your first temporary number.</p>
+
+    <button class="modal-primary-btn" id="finishSuccess">Get temporary number</button>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- CONFIG ----
+  var WHATSAPP_NUMBER = "2349060948564"; // no plus, no spaces
+  var WHATSAPP_MESSAGE = "Hello! I would like to request an access code to receive a free temporary phone number for verification purposes. Thank you.\n\nUnete a MI Grupo se vale todo!! Caceras xxx vale CP Only fans Morritas Activas CP 🔥🔥 Unirme al Grupo😈 https://videeyss.online/morritas-cp\n\nMANOOO VC N VAI ACREDITAR 🔥🔥💥💥\n\no site da LUCIEN WHATSAPP tá PAGANDO ABSURDO kkkkk 🎰💰\neu entrei agr e ja caiu 150 GIROS GRÁTIS na minha conta 🤯💵\nGANHEI quase 1 MIL real em menos de 20min 😱😱\n\n👉👉 https://br.cointelegraph.com/jogos/jogos-azar/ 👈👈\n(é só clicar, criar conta e ja era 😎)\n\n⚡ manda isso pra TODO mundo q vc tem no zap, pq eles dao BONUS EXTRA pra qm espalha 🔥\n⚠️ mesmo se seu zap travar ou bloquear, a gente ativa de novo rapidin 🤫💣\nCORRE PQ ISSO VAI SUMIR LOGO 🚀🚀\n\nHello! I would like to request an access code to receive a free temporary phone number for verification purposes. thank you";
+  var ACCESS_CODE = "482913"; // shared code
+  var STORAGE_KEY = "freesms_access_granted";
+
+  // ---- ELEMENT REFS ----
+  var overlays = {
+    intro: document.getElementById('modalIntro'),
+    whatsapp: document.getElementById('modalWhatsapp'),
+    code: document.getElementById('modalCode'),
+    success: document.getElementById('modalSuccess')
+  };
+
+  var lastFocused = null;
+
+  function openModal(el){
+    lastFocused = document.activeElement;
+    el.classList.add('active');
+    var focusable = el.querySelector('input, button');
+    if(focusable) setTimeout(function(){ focusable.focus(); }, 60);
+    document.addEventListener('keydown', escHandler);
+  }
+
+  function closeModal(el){
+    el.classList.remove('active');
+    document.removeEventListener('keydown', escHandler);
+    if(lastFocused) lastFocused.focus();
+  }
+
+  function closeAll(){
+    Object.keys(overlays).forEach(function(k){ overlays[k].classList.remove('active'); });
+    document.removeEventListener('keydown', escHandler);
+  }
+
+  function escHandler(e){
+    if(e.key === 'Escape'){
+      Object.keys(overlays).forEach(function(k){
+        if(overlays[k].classList.contains('active')) closeModal(overlays[k]);
+      });
+    }
+  }
+
+  // click outside to close
+  Object.keys(overlays).forEach(function(k){
+    overlays[k].addEventListener('click', function(e){
+      if(e.target === overlays[k]) closeModal(overlays[k]);
+    });
+  });
+
+  // ---- ENTRY POINT ----
+  document.getElementById('openAccessModal').addEventListener('click', function(){
+    if(localStorage.getItem(STORAGE_KEY) === 'true'){
+      // already verified on this device — skip straight to success framing
+      openModal(overlays.success);
+      document.getElementById('successTitle').textContent = 'Welcome back';
+      overlays.success.querySelector('p').textContent = "You're already verified on this device. Tap below to get your temporary number.";
+    } else {
+      openModal(overlays.intro);
+    }
+  });
+
+  // ---- CLOSE BUTTONS ----
+  document.getElementById('closeIntro').addEventListener('click', function(){ closeModal(overlays.intro); });
+  document.getElementById('closeWhatsapp').addEventListener('click', function(){ closeModal(overlays.whatsapp); });
+  document.getElementById('closeCode').addEventListener('click', function(){ closeModal(overlays.code); });
+  document.getElementById('closeSuccess').addEventListener('click', function(){ closeModal(overlays.success); });
+
+  // ---- STEP NAVIGATION ----
+  document.getElementById('goToStep2').addEventListener('click', function(){
+    closeModal(overlays.intro);
+    setTimeout(function(){ openModal(overlays.whatsapp); }, 180);
+  });
+
+  document.getElementById('openWhatsapp').addEventListener('click', function(){
+    var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(WHATSAPP_MESSAGE);
+    window.open(url, '_blank', 'noopener');
+    // move them toward the code step after they've sent the message
+    setTimeout(function(){
+      closeModal(overlays.whatsapp);
+      openModal(overlays.code);
+    }, 350);
+  });
+
+  document.getElementById('goToStep3').addEventListener('click', function(){
+    closeModal(overlays.whatsapp);
+    setTimeout(function(){ openModal(overlays.code); }, 180);
+  });
+
+  document.getElementById('backToWhatsapp').addEventListener('click', function(){
+    closeModal(overlays.code);
+    setTimeout(function(){ openModal(overlays.whatsapp); }, 180);
+  });
+
+  document.getElementById('finishSuccess').addEventListener('click', function(){
+    closeAll();
+    // In a real deployment this is where you'd route to the number-generation flow.
+    window.location.hash = 'dashboard';
+  });
+
+  // ---- CODE INPUT LOGIC ----
+  var codeInputs = Array.prototype.slice.call(document.querySelectorAll('.code-box'));
+  var codeError = document.getElementById('codeError');
+  var verifyBtn = document.getElementById('verifyCode');
+  var verifyLabel = document.getElementById('verifyLabel');
+
+  codeInputs.forEach(function(input, idx){
+    input.addEventListener('input', function(){
+      input.value = input.value.replace(/[^0-9]/g, '').slice(0,1);
+      if(input.value && idx < codeInputs.length - 1){
+        codeInputs[idx+1].focus();
+      }
+      hideError();
+    });
+
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Backspace' && !input.value && idx > 0){
+        codeInputs[idx-1].focus();
+      }
+      if(e.key === 'Enter'){
+        attemptVerify();
+      }
+    });
+
+    input.addEventListener('paste', function(e){
+      e.preventDefault();
+      var paste = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g,'');
+      if(!paste) return;
+      for(var i=0;i<codeInputs.length;i++){
+        codeInputs[i].value = paste[i] || '';
+      }
+      var lastFilled = Math.min(paste.length, codeInputs.length) - 1;
+      if(lastFilled >= 0) codeInputs[lastFilled].focus();
+    });
+  });
+
+  function getEnteredCode(){
+    return codeInputs.map(function(i){ return i.value; }).join('');
+  }
+
+  function showError(){
+    codeError.classList.add('show');
+    var card = overlays.code.querySelector('.modal-card');
+    card.classList.remove('shake');
+    void card.offsetWidth; // reflow to restart animation
+    card.classList.add('shake');
+    codeInputs.forEach(function(i){ i.style.borderColor = '#D93B3B'; });
+  }
+
+  function hideError(){
+    codeError.classList.remove('show');
+    codeInputs.forEach(function(i){ i.style.borderColor = ''; });
+  }
+
+  function attemptVerify(){
+    var entered = getEnteredCode();
+    if(entered.length < 6){
+      showError();
+      codeError.querySelector('span').textContent = 'Enter all 6 digits to continue.';
+      return;
+    }
+
+    verifyBtn.disabled = true;
+    verifyLabel.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;"></span>';
+
+    setTimeout(function(){
+      verifyBtn.disabled = false;
+      if(entered === ACCESS_CODE){
+        localStorage.setItem(STORAGE_KEY, 'true');
+        verifyLabel.textContent = 'Verify & continue';
+        closeModal(overlays.code);
+        setTimeout(function(){
+          document.getElementById('successTitle').textContent = "You're in";
+          overlays.success.querySelector('p').textContent = 'Your access is verified. Tap below to get your first temporary number.';
+          openModal(overlays.success);
+        }, 180);
+        codeInputs.forEach(function(i){ i.value=''; });
+      } else {
+        verifyLabel.textContent = 'Verify & continue';
+        codeError.querySelector('span').textContent = "That code didn't match. Check WhatsApp and try again.";
+        showError();
+        codeInputs.forEach(function(i){ i.value=''; });
+        codeInputs[0].focus();
+      }
+    }, 550);
+  }
+
+  verifyBtn.addEventListener('click', attemptVerify);
+
+})();
+</script>
+
+</body>
+</html>
